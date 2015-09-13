@@ -7,6 +7,7 @@ This server uses python 3.4
 using virtualenv:
 
 virtualenv <destination> -ppython3
+
 pip install -r <path_to_project>/requirements.pip
 
 # Description
@@ -29,15 +30,19 @@ the endpoints will be accessed through this pattern:
 
 Root endpoint:
 
-/api/middleman/v1/<APP-HASHID>/
+/api/middleman/v1/<APP-HASHID>
 
 Enabled endpoints for a specific app:
 
-GET /<model_name>  - Fetches all model
-GET /<model_name>/{id} - Fetches a model by id
-POST /<model_name> - Creates a new model
-PUT /<model_name>/{id} - Edit a model
-DELETE /<model_name>/{id} - Deletes a model
+GET /\<model_name\>  - Fetches all model
+
+GET /\<model_name\>/{id} - Fetches a model by id
+
+POST /\<model_name\> - Creates a new model
+
+PUT /\<model_name\>/{id} - Edit a model
+
+DELETE /\<model_name\>/{id} - Deletes a model
 
 APP-HASHID is a hash for the application ID with enough entropy that it will prevent unwanted web spiders to leech
 the entire domain.
