@@ -30,7 +30,7 @@ the endpoints will be accessed through this pattern:
 
 Root endpoint:
 
-/api/middleman/v1/<APP-HASHID>
+/api/middleman/v1/\<APP-HASHID\>
 
 Enabled endpoints for a specific app:
 
