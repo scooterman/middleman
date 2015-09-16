@@ -49,9 +49,7 @@ class Config(object):
 class Testing(Config):
     DEBUG = True
     TESTING = True
-    WTF_CSRF_ENABLED = False
-    SQLALCHEMY_ECHO = True
-    CELERY_ALWAYS_EAGER = True
+    SQLALCHEMY_ECHO = False
 
 class Development(Config):
     DEBUG = True
@@ -61,7 +59,6 @@ class Development(Config):
 class Staging(Config):
     DEBUG = True
     TESTING = True
-    WTF_CSRF_ENABLED = False
 
 class Production(Config):
     pass

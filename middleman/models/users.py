@@ -22,3 +22,10 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
+
+    @staticmethod
+    def create(email, password):
+        return User(email=email, password=password)
+
+    def __repr__(self):
+        return '<User {0!r} {1!r}>'.format(self.id, self.password)

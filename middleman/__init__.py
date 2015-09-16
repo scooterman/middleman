@@ -3,21 +3,16 @@
 import os
 import sys
 
-from flask import Flask, g, request, jsonify
+from flask import Flask
 from flask.ext.environments import Environments
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask_mail import Mail
-from flask_wtf.csrf import CsrfProtect
-from flask.ext.babel import Babel
 
-from hashids import Hashids
+from flask.ext.security import Security, SQLAlchemyUserDatastore
 
 from .database import db
-from truck.exceptions import BaseError
-from truck.settings import from_env_name, Config
-from truck.utils import application_config
-from truck.models.role import Role
-from truck.models.user import User
+from middleman.settings import from_env_name
+from middleman.core.utils import application_config
+from middleman.models.users import Role
+from middleman.models.users import User
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
     os.path.dirname(os.path.realpath(__file__))
