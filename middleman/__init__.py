@@ -7,6 +7,7 @@ from flask import Flask
 from flask.ext.environments import Environments
 
 from flask.ext.security import Security, SQLAlchemyUserDatastore
+from hashids import Hashids
 
 from .database import db
 from middleman.settings import from_env_name
@@ -41,7 +42,6 @@ syspath = os.path.join(PROJECT_DIR, os.pardir)
 if syspath not in sys.path:
     sys.path.insert(0, syspath)
 
-
 def create_app(env_name='DEVELOPMENT'):
     # Flask application
     app = Flask(__name__)
@@ -60,15 +60,14 @@ def create_app(env_name='DEVELOPMENT'):
     db.init_app(app)
     app.extensions['db'] = db
 
+    hasher = Hashids(salt=str(app.config['SECRET_KEY']), min_length=10)
+    app.extensions['hasher'] = hasher
+
     # Flask security
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, user_datastore)
     app.extensions['user_datastore'] = user_datastore
     app.extensions['security'] = security
-
-    # Flask-Admin
-    # admin.init_app(app)
-    # app.extensions['admin'] = admin
 
     from .api.admin import v1 as admin_v1
     from .api.application import v1 as application_v1

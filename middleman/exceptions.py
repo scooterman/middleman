@@ -3,7 +3,7 @@ from flask import jsonify
 
 
 class ApiException(Exception):
-    def __init__(self, reason, extra=None, code=409):
+    def __init__(self, reason=None, extra=None, code=409):
         self.reason = reason
         self.extra = extra
         self.code = code

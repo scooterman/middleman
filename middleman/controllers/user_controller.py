@@ -20,7 +20,7 @@ validate_creation = {
 USER_SALT = b'user_controller'
 
 
-def create(secret_key, email, password):
+def create(secret_key, name, email, password):
     """
     Cria um novo usuário
     :param secret_key: O secret para encodar o token de confirmação
@@ -33,7 +33,7 @@ def create(secret_key, email, password):
     if user_acessor.user_by_email(email):
         raise ApiException(codes.EMAIL_ALREADY_REGISTERED, email)
 
-    user = User.create(email, encrypt_password(password))
+    user = User.create(name, email, encrypt_password(password))
     to_persist(user)
 
     return user

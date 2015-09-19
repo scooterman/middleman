@@ -12,6 +12,7 @@ from middleman.core import error_codes
 
 def test_create(app):
     user = user_controller.create(app.config['SECRET_KEY'], email='cocada@cocada.com',
+                                  name='John',
                                   password='cocada_123')
 
     assert user is not None
@@ -22,6 +23,7 @@ def test_create(app):
 
 def test_create_big_email(app):
     user = user_controller.create(app.config['SECRET_KEY'],
+                                  name='John',
                                   email='thisisahugeemailtosendljajajajakjlaja@ahahjahjaajjhaljçaçljaljçkajç'
                                         'lkjlçkalkjçjaçlkaaheuuehahuaeaeuea.com',
                                   password='cocada_123')
@@ -35,6 +37,7 @@ def test_create_big_email(app):
 def test_create_big_password(app):
     with pytest.raises(ApiException) as e:
         user_controller.create(app.config['SECRET_KEY'],
+                               name='John',
                                email='cocada@cocada.com',
                                password='alçkjsçajlsjafçjskjfdçjasdjfisjbidgjhieushosvos'
                                         'oudhfush!@#!52jlsg')
@@ -55,9 +58,9 @@ def test_invalid_email(app):
 
 
 def test_duplicate_user(app):
-    user_controller.create(app.config['SECRET_KEY'], email='cocada@cocada.com', password='cocada_123')
+    user_controller.create(app.config['SECRET_KEY'], name='John', email='cocada@cocada.com', password='cocada_123')
     with pytest.raises(ApiException) as e:
-        user_controller.create(app.config['SECRET_KEY'], email='cocada@cocada.com', password='cocada_123')
+        user_controller.create(app.config['SECRET_KEY'], name='John', email='cocada@cocada.com', password='cocada_123')
 
     assert e.value.reason == error_codes.EMAIL_ALREADY_REGISTERED
     assert e.value.code == 409

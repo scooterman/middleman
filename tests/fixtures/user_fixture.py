@@ -11,7 +11,7 @@ from middleman.models.users import User
 
 @pytest.fixture
 def user_f(app, session):
-    _user = User.create('user@gmail.com', encrypt_password('cocada_123'))
+    _user = User.create('John', 'user@gmail.com', encrypt_password('cocada_123'))
     _user.confirmed_at = datetime.datetime(2015, 5, 5, 10, 0, 0)
     _user.active = True
 
@@ -22,7 +22,7 @@ def user_f(app, session):
 
 @pytest.fixture
 def user2_f(app, session):
-    _user = User.create('user2@gmail.com', encrypt_password('cocada_123'))
+    _user = User.create('John', 'user2@gmail.com', encrypt_password('cocada_123'))
     _user.confirmed_at = datetime.datetime(2015, 5, 5, 10, 0, 0)
     _user.active = True
 

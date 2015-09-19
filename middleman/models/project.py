@@ -14,15 +14,17 @@ class Project(db.Model):
     name = db.Column(db.String(1024), nullable=False)
     access_token = db.Column(db.String(16), nullable=False)
     create_date = db.Column(db.DateTime(), nullable=False)
+    deployed = db.Column(db.Boolean(), default=False, nullable=False)
 
     owner_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
-    owner = db.relationship('User', uselist=False, backref='projects')
+    owner = db.relationship('User', single_parent=True, uselist=False, backref='projects',
+                            cascade='all, delete, delete-orphan')
 
     @staticmethod
     def create(name, owner):
         access_token = '%016x' % random.randrange(16 ** 16)
         return Project(name=name, access_token=access_token, owner=owner,
-                       create_date=datetime.datetime.now())
+                       create_date=datetime.datetime.now(), deployed=False)
 
     def __repr__(self):
         return '<Project {0!r} {1!r}>'.format(self.id, self.name)
