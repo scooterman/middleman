@@ -184,4 +184,4 @@ different servers. Also, all projects are on the same structure, which can be mo
 - [x] Controllers
 - [ ] Admin interface
 
-@copywright Victor Vicente de Carvalho, 2015
+@copyright Victor Vicente de Carvalho, 2015
