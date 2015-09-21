@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Fittz, Inc. http://fittz.com.br/, all rights reserved.
 # @author: Victor Vicene de Carvalho
 
 from flask.ext.security.utils import encrypt_password, verify_password
@@ -21,12 +20,6 @@ USER_SALT = b'user_controller'
 
 
 def create(secret_key, name, email, password):
-    """
-    Cria um novo usuário
-    :param secret_key: O secret para encodar o token de confirmação
-    :return: o usuário criado
-    """
-
     strip(locals(), 'email', 'password')
     validate(locals(), validate_creation)
 

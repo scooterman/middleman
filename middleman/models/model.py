@@ -36,7 +36,7 @@ class Model(db.Model):
         return self.name
 
     def table_name(self):
-        return self.name + '_' + self.project.name + '_' + self.project.owner.name
+        return self.name + '_' + self.project.name + '_' + self.project.owner.name + '_' + self.id
 
 
 class ModelAttribute(db.Model):

@@ -1,14 +1,32 @@
 # -*- coding: utf-8 -*-
 # author: victor
-from flask import current_app, Blueprint, jsonify, request
+from flask import current_app
 
 from middleman import db
-from middleman.acessors import project_acessor, to_persist, save_all
+from middleman.acessors import project_acessor, to_persist, save_all, to_remove
 from middleman.exceptions import ApiException
 from middleman.core import error_codes
 from middleman.models.model import ModelAttributeType, ModelAttribute, Model
 from middleman.models.project import Project
 from middleman.acessors import model_acessor
+
+
+def get_project_by_access_token(access_token):
+    project = project_acessor.by_access_token(access_token)
+
+    if not project:
+        raise ApiException(code=404)
+
+    return project
+
+
+def model_by_name(project, model_name):
+    model = next(filter(lambda m: m.name.lower() == model_name.lower(), project.models), None)
+
+    if not model:
+        raise ApiException(code=404)
+
+    return model
 
 
 def create(name, owner):
@@ -23,14 +41,20 @@ def create(name, owner):
     return project
 
 
-def project_by_hash(project_hash):
-    project_id = current_app.extensions['hasher'].decode(project_hash)[0]
+def get_user_projects(user):
+    return project_acessor.get_projects_for_user(user)
+
+
+def get_project(user, project_id):
     project = project_acessor.project_by_id(project_id)
 
     if not project:
         raise ApiException(code=404)
 
-    return project_id, project
+    if user != project.owner:
+        raise ApiException(code=403)
+
+    return project
 
 
 def undeploy(project):
@@ -44,66 +68,30 @@ def undeploy(project):
     save_all()
 
 
-def deploy(user, project, access_token):
-    if user != project.owner:
-        raise ApiException(code=403)
+_model_cache = {}
 
-    if access_token != project.access_token:
-        raise ApiException(code=403)
 
+def build_model_db(model):
+    if model.id in _model_cache:
+        return _model_cache[model.id]
+
+    _model_cache[model.id] = model = \
+        model_acessor.build_model(model)
+
+    return model
+
+
+def get_cached_model(model):
+    return build_model_db(model)
+
+
+def deploy(project):
     undeploy(project)
 
     for model in project.models:
-        class CustomModel(db.Model):
-            __tablename__ = model.table_name()
-            id = db.Column(db.Integer(), primary_key=True)
+        build_model_db(model)
 
-        for attribute in model.attributes:
-            if attribute.attrtype == ModelAttributeType.STRING:
-                setattr(CustomModel, attribute.name, db.Column(db.String()))
-            elif attribute.attrtype == ModelAttributeType.INT:
-                setattr(CustomModel, attribute.name, db.Column(db.Integer()))
-            elif attribute.attrtype == ModelAttributeType.BOOLEAN:
-                setattr(CustomModel, attribute.name, db.Column(db.Boolean()))
-            elif attribute.attrtype == ModelAttributeType.DECIMAL:
-                setattr(CustomModel, attribute.name, db.Column(db.Numeric()))
-            elif attribute.attrtype == ModelAttributeType.TEXT:
-                setattr(CustomModel, attribute.name, db.Column(db.Text()))
-
-        db.create_all()
-
-        mod = Blueprint(model.name.lower(), model.table_name())
-
-        @mod.route(model.name, methods=['GET'])
-        def custom_model_get():
-            models = db.session.get(CustomModel).all()
-
-            return jsonify({'result': models})
-
-        @mod.route(model.name, methods=['POST'])
-        def custom_model_post():
-            _model = CustomModel(**request.json)
-            db.session.add(_model)
-            db.session.commit()
-
-        @mod.route(model.name + '/<model_id>', methods=['PUT'])
-        def custom_model_put(model_id):
-            _model = db.session.query(CustomModel).get(model_id)
-
-            for key, value in request.json:
-                setattr(_model, key, value)
-
-            db.session.add(_model)
-            db.session.commit()
-
-        @mod.route(model.name + '/<model_id>', methods=['DELETE'])
-        def custom_model_delete(model_id):
-            _model = db.session.query(CustomModel).get(model_id)
-            db.session.delete(_model)
-            db.session.commit()
-
-        current_app.register_blueprint(mod, url_prefix='/api/' +
-                                                       current_app.extensions['hasher'].encode(project.id) + '/')
+    db.create_all()
 
 
 def unregister_model(model):
@@ -111,25 +99,34 @@ def unregister_model(model):
     model_acessor.drop(model.table_name())
 
 
-def create_model(project_hash, model_name, attribute_def_list):
-    from middleman.controllers import project_controller
+def get_model(project, model_id):
+    model = next(filter(lambda x: x.id == model_id, project.models), None)
 
-    project_id, project = project_controller.project_by_hash(project_hash)
+    if not model:
+        raise ApiException(code=404)
 
+    return model
+
+
+def create_model(project, model_name, attribute_def_list):
     if any((model.name == model_name for model in project.models)):
         raise ApiException(error_codes.MODEL_ALEADY_DEFINED, code=400)
 
     model = Model.create(model_name, project)
     to_persist(model)
 
-    for attribute_def in attribute_def_list:
-        bind_attribute(model, **attribute_def)
+    update_model(model, attribute_def_list)
 
     return model
 
 
-def model_by_hash(model_hash):
-    pass
+def update_model(model, attributes):
+    for attribute_def in attributes:
+        bind_attribute(model, **attribute_def)
+
+
+def remove_model(model):
+    to_remove(model)
 
 
 def bind_attribute(model, name, attrtype):

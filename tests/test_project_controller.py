@@ -45,7 +45,7 @@ def test_project_by_hash(app, user_f):
     # we commit so we get an id for the project
     db.session.commit()
 
-    pid, project = project_controller.project_by_hash(app.extensions['hasher'].encode(project1.id))
+    pid, project = project_controller.get_project(app.extensions['hasher'].encode(project1.id))
 
     assert pid
     assert project

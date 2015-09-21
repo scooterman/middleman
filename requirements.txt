@@ -9,6 +9,8 @@ Flask-Admin==1.2.0
 Flask-Security==1.7.4
 Flask-Environments==0.1
 Flask-SQLAlchemy==2.0
+flask-marshmallow==0.6.2
+marshmallow-sqlalchemy==0.4.1
 
 freezegun==0.3.4
 oath==1.4.1

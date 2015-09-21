@@ -3,13 +3,15 @@
 import os
 import sys
 
-from flask import Flask
+from flask import Flask, Response
 from flask.ext.environments import Environments
+from flask_marshmallow import Marshmallow
 
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from hashids import Hashids
 
 from .database import db
+from middleman.exceptions import ApiException
 from middleman.settings import from_env_name
 from middleman.core.utils import application_config
 from middleman.models.users import Role
@@ -42,6 +44,9 @@ syspath = os.path.join(PROJECT_DIR, os.pardir)
 if syspath not in sys.path:
     sys.path.insert(0, syspath)
 
+ma = Marshmallow()
+
+
 def create_app(env_name='DEVELOPMENT'):
     # Flask application
     app = Flask(__name__)
@@ -58,6 +63,9 @@ def create_app(env_name='DEVELOPMENT'):
     db.app = app  # RuntimeError: application not registered on db
     # instance and no application bound to current context
     db.init_app(app)
+    ma.init_app(app)
+
+    app.extensions['ma'] = ma
     app.extensions['db'] = db
 
     hasher = Hashids(salt=str(app.config['SECRET_KEY']), min_length=10)
@@ -69,10 +77,8 @@ def create_app(env_name='DEVELOPMENT'):
     app.extensions['user_datastore'] = user_datastore
     app.extensions['security'] = security
 
-    from .api.admin import v1 as admin_v1
     from .api.application import v1 as application_v1
 
-    admin_v1.setup(app)
     application_v1.setup(app)
 
     # Templates
@@ -86,5 +92,14 @@ def create_app(env_name='DEVELOPMENT'):
         return {
             'app_config': application_config()
         }
+
+    @app.errorhandler(TypeError)
+    def handle_type_error(error):
+        response = Response(status=400)
+        return response
+
+    @app.errorhandler(ApiException)
+    def handle_type_error(error):
+        return error.to_response()
 
     return app

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # author: victor
-
+from functools import wraps
 from flask import request
+from middleman.acessors import save_all
 
 from middleman.exceptions import ApiException
 from . import error_codes
@@ -46,3 +47,14 @@ def application_config():
         'contextPath': ctx_path,
     }
     return app_config
+
+
+def persist(f):
+
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        result = f(*args, **kwargs)
+        save_all()
+        return result
+
+    return wrap

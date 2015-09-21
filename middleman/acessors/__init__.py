@@ -10,3 +10,6 @@ def to_persist(entity):
 
 def save_all():
     db.session.commit()
+
+def to_remove(entity):
+    db.session.delete(entity)

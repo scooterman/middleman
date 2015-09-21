@@ -1,4 +1,4 @@
-from flask.ext.login import UserMixin
+from flask.ext.login import UserMixin, make_secure_token
 from flask.ext.security import RoleMixin
 
 from middleman import db
@@ -30,3 +30,6 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return '<User {0!r} {1!r}>'.format(self.id, self.password)
+
+    def get_auth_token(self):
+        return make_secure_token(self.email, str(self.id), self.password)
